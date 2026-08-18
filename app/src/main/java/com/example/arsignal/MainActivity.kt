@@ -1,4 +1,4 @@
-package com.example.arsignal
+package com.example.arcellular
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -11,12 +11,9 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.google.android.filament.Engine
 import io.github.sceneview.ar.ArSceneView
 import io.github.sceneview.ar.node.ArNode
 import io.github.sceneview.math.Position
-import io.github.sceneview.node.ModelNode
-import io.github.sceneview.node.Node
 import io.github.sceneview.utils.Color
 
 class MainActivity : AppCompatActivity() {
@@ -122,16 +119,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun add3DSignalNode(dbm: Int) {
-        val nodeColor = when {
-            dbm >= -75 -> Color(0.0f, 1.0f, 0.0f, 1.0f) // Green
-            dbm >= -95 -> Color(1.0f, 1.0f, 0.0f, 1.0f) // Yellow
-            else -> Color(1.0f, 0.0f, 0.0f, 1.0f)       // Red
-        }
-
-        // Purana Node remove karein taaki duplicate nodes na banein
+        // Purana Node remove karein taaki stack na bane
         currentArNode?.let { sceneView.removeChild(it) }
 
-        // Standard Node create karke Camera se 1 meter aage (Z = -1.0f) place karein
+        // Standard ArNode create karke Camera se 1 meter aage place karein
         val arNode = ArNode(sceneView.engine).apply {
             position = Position(x = 0.0f, y = 0.0f, z = -1.0f)
         }
