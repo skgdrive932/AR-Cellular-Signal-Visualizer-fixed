@@ -1,4 +1,4 @@
-package com.example.arcellular
+package com.example.arsignal
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -12,6 +12,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.ar.core.ArCoreApk
@@ -123,12 +124,14 @@ class MainActivity : AppCompatActivity() {
             arOverlayCard.visibility = View.VISIBLE
             modeSwitchButton.text = "SWITCH TO 2D MODE"
 
-            // AR SceneView dynamically add karein jab user click kare
+            // Dynamic AR View Creation
             if (sceneView == null) {
                 sceneView = ArSceneView(this)
                 arContainer.addView(sceneView)
             }
-            checkAndInstallARCore()
+
+            // Custom Dialog check trigger
+            checkAndPromptARCore()
         } else {
             // Switch to 2D Mode
             arContainer.visibility = View.GONE
@@ -148,19 +151,48 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkAndInstallARCore() {
+    private fun checkAndPromptARCore() {
         try {
-            when (ArCoreApk.getInstance().requestInstall(this, userRequestedInstall)) {
-                ArCoreApk.InstallStatus.INSTALL_REQUESTED -> {
-                    userRequestedInstall = false
-                    return
-                }
-                ArCoreApk.InstallStatus.INSTALLED -> {
-                    // Ready
-                }
+            val availability = ArCoreApk.getInstance().checkAvailability(this)
+
+            if (availability.isTransient) {
+                // Agar status check hone mein thoda time lag raha ho toh retry
+                handler.postDelayed({ checkAndPromptARCore() }, 200)
+                return
+            }
+
+            if (!availability.isSupported) {
+                Toast.makeText(this, "ARCore is not supported on this device", Toast.LENGTH_SHORT).show()
+                toggleMode(false)
+                return
+            }
+
+            // Check if ARCore is installed or needs installation/update
+            val installStatus = ArCoreApk.getInstance().requestInstall(this, false)
+            if (installStatus == ArCoreApk.InstallStatus.INSTALL_REQUESTED) {
+                
+                // Custom Alert Dialog with CONTINUE and CANCEL buttons
+                AlertDialog.Builder(this)
+                    .setTitle("Google Play Services for AR")
+                    .setMessage("This application requires the latest version of Google Play Services for AR to run 3D mode.")
+                    .setPositiveButton("CONTINUE") { _, _ ->
+                        try {
+                            ArCoreApk.getInstance().requestInstall(this, true)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                    .setNegativeButton("CANCEL") { dialog, _ ->
+                        dialog.dismiss()
+                        toggleMode(false) // Safe fallback to 2D Mode
+                        Toast.makeText(this, "Switched back to 2D Mode", Toast.LENGTH_SHORT).show()
+                    }
+                    .setCancelable(false)
+                    .show()
             }
         } catch (e: UnavailableException) {
-            Toast.makeText(this, "ARCore is not supported on this device", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "ARCore unavailable on this device", Toast.LENGTH_SHORT).show()
+            toggleMode(false)
         }
     }
 
