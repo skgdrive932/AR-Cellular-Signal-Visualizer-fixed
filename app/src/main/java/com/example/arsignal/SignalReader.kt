@@ -4,53 +4,104 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.telephony.CellInfo
+import android.telephony.CellInfoGsm
 import android.telephony.CellInfoLte
 import android.telephony.CellInfoNr
-import android.telephony.CellInfoGsm
 import android.telephony.CellInfoWcdma
 import android.telephony.TelephonyManager
 import androidx.core.content.ContextCompat
 
 data class SignalInfo(
     val dbm: Int?,
-    val networkType: String,
-    val registered: Boolean
+    val networkType: String
 )
 
 class SignalReader(private val context: Context) {
-    private val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
-    fun read(): SignalInfo {
-        val hasLocation = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        val hasPhone = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED
-        if (!hasLocation && !hasPhone) return SignalInfo(null, "Permission required", false)
-
-        return try {
-            val list: List<CellInfo>? = telephonyManager.allCellInfo
-            val registered = list.orEmpty().firstOrNull { it.isRegistered }
-            if (registered == null) return SignalInfo(null, "No registered cell", false)
-            when (registered) {
-                is CellInfoNr -> SignalInfo(registered.cellSignalStrength.dbm, "5G NR", true)
-                is CellInfoLte -> SignalInfo(registered.cellSignalStrength.dbm, "4G LTE", true)
-                is CellInfoWcdma -> SignalInfo(registered.cellSignalStrength.dbm, "3G WCDMA", true)
-                is CellInfoGsm -> SignalInfo(registered.cellSignalStrength.dbm, "2G GSM", true)
-                else -> SignalInfo(registered.cellSignalStrength.dbm, "Cellular", true)
-            }
-        } catch (_: SecurityException) {
-            SignalInfo(null, "Permission required", false)
-        } catch (_: Exception) {
-            SignalInfo(null, "Unavailable", false)
-        }
-    }
+    private val telephonyManager =
+        context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
     fun hasRequiredPermissions(): Boolean {
-        val location = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        val phone = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED
-        } else true
-        return location && phone
+        val fineLocation = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val phoneState = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.READ_PHONE_STATE
+        ) == PackageManager.PERMISSION_GRANTED
+
+        return fineLocation && phoneState
+    }
+
+    fun read(): SignalInfo {
+        if (!hasRequiredPermissions()) {
+            return SignalInfo(null, "No permissions granted")
+        }
+
+        var dbm: Int? = null
+        var networkType = "Unknown"
+
+        try {
+            // Fetch Network Type Name
+            networkType = getNetworkTypeName()
+
+            // Fetch Cell Info for Signal Strength (dBm)
+            val cellInfoList = telephonyManager.allCellInfo
+            if (!cellInfoList.isNullOrEmpty()) {
+                for (info in cellInfoList) {
+                    if (info.isRegistered) {
+                        when (info) {
+                            is CellInfoLte -> dbm = info.cellSignalStrength.dbm
+                            is CellInfoGsm -> dbm = info.cellSignalStrength.dbm
+                            is CellInfoWcdma -> dbm = info.cellSignalStrength.dbm
+                            is CellInfoNr -> {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                    dbm = info.cellSignalStrength.dbm
+                                }
+                            }
+                        }
+                        if (dbm != null && dbm != Int.MAX_VALUE) break
+                    }
+                }
+            }
+
+            // Fallback for Signal Strength if allCellInfo returns null
+            if (dbm == null || dbm == Int.MAX_VALUE) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    val signalStrength = telephonyManager.signalStrength
+                    if (signalStrength != null) {
+                        val cellSignalStrengths = signalStrength.cellSignalStrengths
+                        if (cellSignalStrengths.isNotEmpty()) {
+                            dbm = cellSignalStrengths[0].dbm
+                        }
+                    }
+                }
+            }
+        } catch (e: SecurityException) {
+            return SignalInfo(null, "Security Exception")
+        } catch (e: Exception) {
+            return SignalInfo(null, "Error reading signal")
+        }
+
+        if (dbm == Int.MAX_VALUE || dbm == null) {
+            return SignalInfo(null, if (networkType.isNotEmpty()) networkType else "No registered cell")
+        }
+
+        return SignalInfo(dbm, networkType)
+    }
+
+    private fun getNetworkTypeName(): String {
+        return try {
+            val networkType = telephonyManager.dataNetworkType
+            when (networkType) {
+                TelephonyManager.NETWORK_TYPE_LTE -> "4G LTE"
+                TelephonyManager.NETWORK_TYPE_NR -> "5G NR"
+                TelephonyManager.NETWORK_TYPE_HSPAP,
+                TelephonyManager.NETWORK_TYPE_HSDPA -> "3G"
+                else -> telephonyManager.networkOperatorName.ifEmpty { "Cellular Network" }
+            }
+        } catch (e: Exception) {
+            "Cellular Network"
+        }
     }
 }
