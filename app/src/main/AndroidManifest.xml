@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.arcellular">
 
     <!-- Location & Cell Signal Permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     
-    <!-- Camera & AR Permissions -->
+    <!-- Camera Permission for AR -->
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- Hardware Requirements -->
+    <!-- Hardware Features Requirement -->
     <uses-feature android:name="android.hardware.camera" android:required="true" />
     <uses-feature android:name="android.hardware.camera.ar" android:required="true" />
 
@@ -20,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!-- Google ARCore Dependency (Crucial for AR View) -->
+        <!-- Google ARCore Dependency -->
         <meta-data
             android:name="com.google.ar.core"
             android:value="required" />
@@ -33,6 +34,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>
