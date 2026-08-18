@@ -8,13 +8,15 @@ import android.os.Looper
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.ar.core.ArCoreApk
+import com.google.ar.core.exceptions.UnavailableException
 import io.github.sceneview.ar.ArSceneView
 import io.github.sceneview.ar.node.ArNode
 import io.github.sceneview.math.Position
-import io.github.sceneview.utils.Color
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sceneView: ArSceneView
 
     private var currentArNode: ArNode? = null
+    private var userRequestedInstall = true
     private val handler = Handler(Looper.getMainLooper())
 
     private val requiredPermissions = arrayOf(
@@ -70,6 +73,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // ARCore Service Availability Check & Dynamic Prompt
+        checkAndInstallARCore()
+    }
+
     override fun onStart() {
         super.onStart()
         handler.post(poller)
@@ -78,6 +87,22 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         handler.removeCallbacks(poller)
         super.onStop()
+    }
+
+    private fun checkAndInstallARCore() {
+        try {
+            when (ArCoreApk.getInstance().requestInstall(this, userRequestedInstall)) {
+                ArCoreApk.InstallStatus.INSTALL_REQUESTED -> {
+                    userRequestedInstall = false
+                    return
+                }
+                ArCoreApk.InstallStatus.INSTALLED -> {
+                    // ARCore Play Services fully ready
+                }
+            }
+        } catch (e: UnavailableException) {
+            Toast.makeText(this, "ARCore is not supported on this device", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun hasAllPermissions(): Boolean {
@@ -114,15 +139,12 @@ class MainActivity : AppCompatActivity() {
         networkText.text = "Network: ${info.networkType}"
         qualityText.text = "Quality: ${quality(info.dbm)}"
 
-        // AR Space mein 3D Node render/update karein
         add3DSignalNode(info.dbm)
     }
 
     private fun add3DSignalNode(dbm: Int) {
-        // Purana Node remove karein taaki stack na bane
         currentArNode?.let { sceneView.removeChild(it) }
 
-        // Standard ArNode create karke Camera se 1 meter aage place karein
         val arNode = ArNode(sceneView.engine).apply {
             position = Position(x = 0.0f, y = 0.0f, z = -1.0f)
         }
