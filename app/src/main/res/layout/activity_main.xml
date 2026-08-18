@@ -40,7 +40,17 @@
             android:layout_marginTop="12dp"
             android:text="SWITCH TO 3D AR MODE" />
 
-        <!-- 2D Container -->
+        <!-- Refresh Button -->
+        <Button
+            android:id="@+id/refreshButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="REFRESH SIGNAL"
+            android:backgroundTint="#6200EE"
+            android:textColor="@android:color/white" />
+
+        <!-- 2D Dashboard -->
         <LinearLayout
             android:id="@+id/container2D"
             android:layout_width="match_parent"
@@ -71,7 +81,7 @@
                 android:textSize="16sp" />
         </LinearLayout>
 
-        <!-- AR 3D Container -->
+        <!-- 3D AR View Container -->
         <FrameLayout
             android:id="@+id/arContainer"
             android:layout_width="match_parent"
