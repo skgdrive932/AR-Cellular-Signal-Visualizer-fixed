@@ -15,3 +15,9 @@ ARCore camera view and anchored AR signal markers can be added after this build 
 
 ## Build
 Use Android Studio or the included GitHub Actions workflow. The GitHub workflow produces a debug APK artifact.
+
+## 🧑‍💻 Author & Contact
+
+- **Name:** SK Kaushal
+- **Email:** skgdrive932@gmail.com
+- **Contact:** +919779371866
