@@ -1,21 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#121212">
 
-    <!-- Container for AR View (Only created dynamically in 3D mode) -->
+    <!-- Top Action Toolbar for Settings & About Menu -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_alignParentTop="true"
+        android:background="#1E1E1E"
+        android:elevation="4dp"
+        app:title="AR Signal Visualizer"
+        app:titleTextColor="#FFFFFF" />
+
+    <!-- Status Sub-Header Below Toolbar -->
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
+        android:background="#80000000"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2D Dashboard Mode Active"
+            android:textColor="#CCCCCC"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- Container for Dynamic 3D AR Scene -->
     <FrameLayout
         android:id="@+id/arContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/headerLayout"
         android:visibility="gone" />
 
-    <!-- 2D View Container (Clean Signal Dashboard) -->
+    <!-- 2D View Container (Dashboard) -->
     <LinearLayout
         android:id="@+id/container2D"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/headerLayout"
         android:gravity="center"
         android:orientation="vertical"
         android:padding="24dp"
@@ -57,31 +90,6 @@
             android:textColor="#AAAAAA"
             android:textSize="16sp" />
 
-    </LinearLayout>
-
-    <!-- Top Status Header -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#80000000"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="AR Cellular Signal Visualizer"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/statusText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2D Dashboard Mode Active"
-            android:textColor="#CCCCCC"
-            android:textSize="13sp" />
     </LinearLayout>
 
     <!-- Bottom AR Card Overlay -->
