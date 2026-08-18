@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -26,8 +27,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var permissionButton: Button
     private lateinit var modeSwitchButton: Button
 
-    // 3D View Elements
-    private lateinit var sceneView: ArSceneView
+    // AR Dynamic Container
+    private lateinit var arContainer: FrameLayout
+    private var sceneView: ArSceneView? = null
     private lateinit var arOverlayCard: LinearLayout
     private lateinit var signalText: TextView
     private lateinit var networkText: TextView
@@ -70,19 +72,16 @@ class MainActivity : AppCompatActivity() {
 
         reader = SignalReader(this)
 
-        // Initialize UI Views
         statusText = findViewById(R.id.statusText)
         permissionButton = findViewById(R.id.permissionButton)
         modeSwitchButton = findViewById(R.id.modeSwitchButton)
 
-        // 3D Views
-        sceneView = findViewById(R.id.sceneView)
+        arContainer = findViewById(R.id.arContainer)
         arOverlayCard = findViewById(R.id.arOverlayCard)
         signalText = findViewById(R.id.signalText)
         networkText = findViewById(R.id.networkText)
         qualityText = findViewById(R.id.qualityText)
 
-        // 2D Views
         container2D = findViewById(R.id.container2D)
         signalText2D = findViewById(R.id.signalText2D)
         networkText2D = findViewById(R.id.networkText2D)
@@ -90,25 +89,17 @@ class MainActivity : AppCompatActivity() {
 
         permissionButton.setOnClickListener { requestPermissionsIfNeeded() }
 
-        // Mode Switching Click Handler
         modeSwitchButton.setOnClickListener {
             toggleMode(!is3DMode)
         }
 
-        // Default Mode setup (2D Mode first)
+        // Direct 2D setup on Start
         toggleMode(false)
 
         if (hasAllPermissions()) {
             updatePermissionState()
         } else {
             requestPermissionsIfNeeded()
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (is3DMode) {
-            checkAndInstallARCore()
         }
     }
 
@@ -128,22 +119,32 @@ class MainActivity : AppCompatActivity() {
         if (is3DMode) {
             // Switch to 3D AR Mode
             container2D.visibility = View.GONE
-            sceneView.visibility = View.VISIBLE
+            arContainer.visibility = View.VISIBLE
             arOverlayCard.visibility = View.VISIBLE
-            modeSwitchButton.text = "Switch to 2D Mode"
+            modeSwitchButton.text = "SWITCH TO 2D MODE"
 
-            // Check ARCore when entering 3D Mode
+            // AR SceneView dynamically add karein jab user click kare
+            if (sceneView == null) {
+                sceneView = ArSceneView(this)
+                arContainer.addView(sceneView)
+            }
             checkAndInstallARCore()
         } else {
             // Switch to 2D Mode
-            sceneView.visibility = View.GONE
+            arContainer.visibility = View.GONE
             arOverlayCard.visibility = View.GONE
             container2D.visibility = View.VISIBLE
-            modeSwitchButton.text = "Switch to 3D AR Mode"
+            modeSwitchButton.text = "SWITCH TO 3D AR MODE"
+
+            // Destroy AR View to save resources
+            sceneView?.let {
+                arContainer.removeView(it)
+                sceneView = null
+            }
         }
 
         if (hasAllPermissions()) {
-            updateSignal()
+            updatePermissionState()
         }
     }
 
@@ -155,7 +156,7 @@ class MainActivity : AppCompatActivity() {
                     return
                 }
                 ArCoreApk.InstallStatus.INSTALLED -> {
-                    // ARCore Play Services ready
+                    // Ready
                 }
             }
         } catch (e: UnavailableException) {
@@ -202,31 +203,29 @@ class MainActivity : AppCompatActivity() {
         val netStr = "Network: ${info.networkType}"
         val qualStr = "Quality: ${quality(info.dbm)}"
 
-        // Update 2D Dashboard Views
         signalText2D.text = dbmStr
         networkText2D.text = netStr
         qualityText2D.text = qualStr
 
-        // Update 3D AR Overlay Views
         signalText.text = dbmStr
         networkText.text = netStr
         qualityText.text = qualStr
 
-        // Render 3D Node in Space only if in 3D AR Mode
         if (is3DMode) {
             add3DSignalNode(info.dbm)
         }
     }
 
     private fun add3DSignalNode(dbm: Int) {
-        currentArNode?.let { sceneView.removeChild(it) }
+        val activeView = sceneView ?: return
+        currentArNode?.let { activeView.removeChild(it) }
 
-        val arNode = ArNode(sceneView.engine).apply {
+        val arNode = ArNode(activeView.engine).apply {
             position = Position(x = 0.0f, y = 0.0f, z = -1.0f)
         }
 
         currentArNode = arNode
-        sceneView.addChild(arNode)
+        activeView.addChild(arNode)
     }
 
     private fun quality(dbm: Int): String = when {
