@@ -1,80 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/signal_background">
+    android:background="#000000">
 
+    <!-- Background Camera View Finder -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/viewFinder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Top Status Header Bar -->
     <LinearLayout
+        android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top"
+        android:layout_alignParentTop="true"
+        android:background="#99000000"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="16dp">
 
         <TextView
+            android:id="@+id/titleText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="AR Cellular Signal Visualizer"
-            android:textColor="@color/signal_text"
-            android:textSize="22sp"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/statusText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="Checking permissions…"
-            android:textColor="@color/signal_secondary"
+            android:layout_marginTop="4dp"
+            android:text="Permissions ready • Live signal monitoring"
+            android:textColor="#B0BEC5"
             android:textSize="14sp" />
     </LinearLayout>
 
+    <!-- Floating Live Signal Metrics Overlay Card -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="24dp"
-        android:background="@color/signal_card"
+        android:layout_centerInParent="true"
+        android:layout_marginHorizontal="24dp"
+        android:background="@android:color/black"
+        android:backgroundTint="#B3121C24"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="20dp">
 
         <TextView
             android:id="@+id/signalText"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Signal unavailable"
-            android:textColor="@color/signal_text"
+            android:text="-- dBm"
+            android:textColor="#00FF66"
             android:textSize="32sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/networkText"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:gravity="center"
-            android:text="Network: —"
-            android:textColor="@color/signal_secondary"
-            android:textSize="18sp" />
+            android:layout_marginTop="8dp"
+            android:text="Network: Scanning..."
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/qualityText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Quality: —"
+            android:textColor="#E0E0E0"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/permissionButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center"
-            android:text="Quality: —"
-            android:textColor="@color/signal_secondary"
-            android:textSize="18sp" />
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#00E676"
+            android:text="Grant Required Permissions"
+            android:textColor="#000000"
+            android:visibility="gone" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/permissionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="32dp"
-        android:text="Grant permissions"
-        android:visibility="gone" />
-</FrameLayout>
+</RelativeLayout>
