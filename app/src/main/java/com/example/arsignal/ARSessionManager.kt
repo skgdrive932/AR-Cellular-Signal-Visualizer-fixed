@@ -1,4 +1,4 @@
-package com.example.arcellular
+package com.example.arsignal
 
 import android.app.Activity
 import android.content.pm.PackageManager
