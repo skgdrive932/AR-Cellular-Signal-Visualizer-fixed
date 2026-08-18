@@ -1,4 +1,4 @@
-package com.example.arcellular
+package com.example.arsignal
 
 import android.Manifest
 import android.content.Intent
@@ -20,6 +20,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import com.example.arsignal.R
 import com.google.ar.core.ArCoreApk
 import io.github.sceneview.ar.ArSceneView
 import io.github.sceneview.ar.node.ArNode
@@ -31,7 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
     private lateinit var permissionButton: Button
     private lateinit var modeSwitchButton: Button
-    private lateinit var refreshButton: Button // 1. Variable Declare kiya
+    private lateinit var refreshButton: Button
 
     private lateinit var arContainer: FrameLayout
     private var sceneView: ArSceneView? = null
@@ -81,17 +82,7 @@ class MainActivity : AppCompatActivity() {
         statusText = findViewById(R.id.statusText)
         permissionButton = findViewById(R.id.permissionButton)
         modeSwitchButton = findViewById(R.id.modeSwitchButton)
-        refreshButton = findViewById(R.id.refreshButton) // 2. Initialise kiya
-
-        // 3. Listener set kiya
-        refreshButton.setOnClickListener {
-            if (hasAllPermissions()) {
-                updateSignal()
-                Toast.makeText(this, "Signal Refreshed", Toast.LENGTH_SHORT).show()
-            } else {
-                requestPermissionsIfNeeded()
-            }
-        }
+        refreshButton = findViewById(R.id.refreshButton)
 
         arContainer = findViewById(R.id.arContainer)
         arOverlayCard = findViewById(R.id.arOverlayCard)
@@ -106,6 +97,15 @@ class MainActivity : AppCompatActivity() {
 
         permissionButton.setOnClickListener { requestPermissionsIfNeeded() }
 
+        refreshButton.setOnClickListener {
+            if (hasAllPermissions()) {
+                updateSignal()
+                Toast.makeText(this, "Signal Refreshed", Toast.LENGTH_SHORT).show()
+            } else {
+                requestPermissionsIfNeeded()
+            }
+        }
+
         modeSwitchButton.setOnClickListener {
             toggleMode(!is3DMode)
         }
@@ -119,7 +119,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // --- Baki code waisa hi rahega ---
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true
@@ -127,8 +126,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.action_settings -> { showSettingsDialog(); true }
-            R.id.action_about -> { showAboutReadmeDialog(); true }
+            R.id.action_settings -> {
+                showSettingsDialog()
+                true
+            }
+            R.id.action_about -> {
+                showAboutReadmeDialog()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -143,7 +148,11 @@ class MainActivity : AppCompatActivity() {
                     data = Uri.parse("mailto:skgdrive932@gmail.com")
                     putExtra(Intent.EXTRA_SUBJECT, "Feedback: AR Cellular Signal Visualizer")
                 }
-                startActivity(intent)
+                try {
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(this, "No email client found", Toast.LENGTH_SHORT).show()
+                }
             }
             .show()
     }
@@ -168,43 +177,162 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    override fun onStart() {
+        super.onStart()
+        handler.post(poller)
+    }
+
+    override fun onStop() {
+        handler.removeCallbacks(poller)
+        super.onStop()
+    }
+
     private fun toggleMode(enable3D: Boolean) {
         is3DMode = enable3D
+
         if (is3DMode) {
             container2D.visibility = View.GONE
             arContainer.visibility = View.VISIBLE
+            arOverlayCard.visibility = View.VISIBLE
             modeSwitchButton.text = "SWITCH TO 2D MODE"
+
             if (sceneView == null) {
                 sceneView = ArSceneView(this)
                 arContainer.addView(sceneView)
             }
+
+            checkAndPromptARCore()
         } else {
             arContainer.visibility = View.GONE
+            arOverlayCard.visibility = View.GONE
             container2D.visibility = View.VISIBLE
             modeSwitchButton.text = "SWITCH TO 3D AR MODE"
+
+            sceneView?.let {
+                arContainer.removeView(it)
+                sceneView = null
+            }
+        }
+
+        if (hasAllPermissions()) {
+            updatePermissionState()
+        }
+    }
+
+    private fun checkAndPromptARCore() {
+        try {
+            val availability = ArCoreApk.getInstance().checkAvailability(this)
+
+            if (availability.isTransient) {
+                handler.postDelayed({ checkAndPromptARCore() }, 200)
+                return
+            }
+
+            if (!availability.isSupported || availability == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE) {
+                showCustomArRequiredDialog()
+            } else {
+                val installStatus = ArCoreApk.getInstance().requestInstall(this, false)
+                if (installStatus == ArCoreApk.InstallStatus.INSTALL_REQUESTED) {
+                    showCustomArRequiredDialog()
+                }
+            }
+        } catch (e: Exception) {
+            showCustomArRequiredDialog()
+        }
+    }
+
+    private fun showCustomArRequiredDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("AR Core Required")
+            .setMessage("3D AR mode use karne ke liye Google Play Services for AR required hai. Kya aap ise setup karna chahte hain?")
+            .setPositiveButton("Install / Enable") { _, _ ->
+                try {
+                    ArCoreApk.getInstance().requestInstall(this, true)
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Unable to launch AR installer", Toast.LENGTH_SHORT).show()
+                    toggleMode(false)
+                }
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+                toggleMode(false)
+                Toast.makeText(this, "Switched back to 2D Mode", Toast.LENGTH_SHORT).show()
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun hasAllPermissions(): Boolean {
+        return requiredPermissions.all {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    private fun requestPermissionsIfNeeded() {
+        permissionLauncher.launch(requiredPermissions)
+    }
+
+    private fun updatePermissionState() {
+        if (hasAllPermissions()) {
+            statusText.text = if (is3DMode) "3D AR Mode Active" else "2D Dashboard Mode Active"
+            permissionButton.visibility = View.GONE
+            updateSignal()
+        } else {
+            statusText.text = "Permissions required"
+            permissionButton.visibility = View.VISIBLE
         }
     }
 
     private fun updateSignal() {
+        if (!::reader.isInitialized) return
+
         val info = reader.read()
-        val dbmStr = "${info.dbm ?: "N/A"} dBm"
-        signalText2D.text = dbmStr
-        signalText.text = dbmStr
-        // ... (Baaki signal update logic)
-    }
 
-    private fun hasAllPermissions(): Boolean = requiredPermissions.all {
-        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun requestPermissionsIfNeeded() = permissionLauncher.launch(requiredPermissions)
-
-    private fun updatePermissionState() {
-        if (hasAllPermissions()) {
-            permissionButton.visibility = View.GONE
-            updateSignal()
-        } else {
-            permissionButton.visibility = View.VISIBLE
+        if (info.dbm == null) {
+            val unavail = "Signal unavailable"
+            signalText.text = unavail
+            signalText2D.text = unavail
+            networkText.text = "Network: ${info.networkType}"
+            networkText2D.text = "Network: ${info.networkType}"
+            qualityText.text = "Quality: —"
+            qualityText2D.text = "Quality: —"
+            return
         }
+
+        val dbmStr = "${info.dbm} dBm"
+        val netStr = "Network: ${info.networkType}"
+        val qualStr = "Quality: ${quality(info.dbm)}"
+
+        signalText2D.text = dbmStr
+        networkText2D.text = netStr
+        qualityText2D.text = qualStr
+
+        signalText.text = dbmStr
+        networkText.text = netStr
+        qualityText.text = qualStr
+
+        if (is3DMode) {
+            add3DSignalNode(info.dbm)
+        }
+    }
+
+    private fun add3DSignalNode(dbm: Int) {
+        val activeView = sceneView ?: return
+        currentArNode?.let { activeView.removeChild(it) }
+
+        val arNode = ArNode(activeView.engine).apply {
+            position = Position(x = 0.0f, y = 0.0f, z = -1.0f)
+        }
+
+        currentArNode = arNode
+        activeView.addChild(arNode)
+    }
+
+    private fun quality(dbm: Int): String = when {
+        dbm >= -60 -> "Excellent"
+        dbm >= -75 -> "Good"
+        dbm >= -90 -> "Fair"
+        dbm >= -105 -> "Poor"
+        else -> "Very Poor"
     }
 }
