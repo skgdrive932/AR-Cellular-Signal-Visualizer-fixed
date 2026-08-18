@@ -23,9 +23,8 @@
 
         <!-- ARCore Metadata Conflict Fix -->
         <meta-data
-            android:name="com.google.ar.core"
-            android:value="required"
-            tools:replace="android:value" />
+    android:name="com.google.ar.core"
+    android:value="optional" />
 
         <activity
             android:name=".MainActivity"
