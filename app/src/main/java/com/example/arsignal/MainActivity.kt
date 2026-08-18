@@ -18,7 +18,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import com.example.arsignal.R
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.exceptions.UnavailableException
 import io.github.sceneview.ar.ArSceneView
@@ -72,28 +71,32 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        
+        // Auto-detect layout ID using packageName to avoid 'Unresolved reference: R'
+        val layoutId = resources.getIdentifier("activity_main", "layout", packageName)
+        setContentView(layoutId)
 
-        // Setup Action Toolbar
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        // Setup Toolbar dynamically
+        val toolbarId = resources.getIdentifier("toolbar", "id", packageName)
+        val toolbar: Toolbar = findViewById(toolbarId)
         setSupportActionBar(toolbar)
 
         reader = SignalReader(this)
 
-        statusText = findViewById(R.id.statusText)
-        permissionButton = findViewById(R.id.permissionButton)
-        modeSwitchButton = findViewById(R.id.modeSwitchButton)
+        statusText = findViewById(resources.getIdentifier("statusText", "id", packageName))
+        permissionButton = findViewById(resources.getIdentifier("permissionButton", "id", packageName))
+        modeSwitchButton = findViewById(resources.getIdentifier("modeSwitchButton", "id", packageName))
 
-        arContainer = findViewById(R.id.arContainer)
-        arOverlayCard = findViewById(R.id.arOverlayCard)
-        signalText = findViewById(R.id.signalText)
-        networkText = findViewById(R.id.networkText)
-        qualityText = findViewById(R.id.qualityText)
+        arContainer = findViewById(resources.getIdentifier("arContainer", "id", packageName))
+        arOverlayCard = findViewById(resources.getIdentifier("arOverlayCard", "id", packageName))
+        signalText = findViewById(resources.getIdentifier("signalText", "id", packageName))
+        networkText = findViewById(resources.getIdentifier("networkText", "id", packageName))
+        qualityText = findViewById(resources.getIdentifier("qualityText", "id", packageName))
 
-        container2D = findViewById(R.id.container2D)
-        signalText2D = findViewById(R.id.signalText2D)
-        networkText2D = findViewById(R.id.networkText2D)
-        qualityText2D = findViewById(R.id.qualityText2D)
+        container2D = findViewById(resources.getIdentifier("container2D", "id", packageName))
+        signalText2D = findViewById(resources.getIdentifier("signalText2D", "id", packageName))
+        networkText2D = findViewById(resources.getIdentifier("networkText2D", "id", packageName))
+        qualityText2D = findViewById(resources.getIdentifier("qualityText2D", "id", packageName))
 
         permissionButton.setOnClickListener { requestPermissionsIfNeeded() }
 
@@ -110,20 +113,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 3-Dot Menu Initialize
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
+        val menuId = resources.getIdentifier("main_menu", "menu", packageName)
+        if (menuId != 0) {
+            menuInflater.inflate(menuId, menu)
+        }
         return true
     }
 
-    // Menu Clicks Handling
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val settingsId = resources.getIdentifier("action_settings", "id", packageName)
+        val aboutId = resources.getIdentifier("action_about", "id", packageName)
+
         return when (item.itemId) {
-            R.id.action_settings -> {
+            settingsId -> {
                 showSettingsDialog()
                 true
             }
-            R.id.action_about -> {
+            aboutId -> {
                 showAboutReadmeDialog()
                 true
             }
@@ -131,7 +138,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Settings Action
     private fun showSettingsDialog() {
         AlertDialog.Builder(this)
             .setTitle("Settings")
@@ -140,7 +146,6 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    // About Dialog (Displays README details)
     private fun showAboutReadmeDialog() {
         val readmeContent = """
             # AR Cellular Signal Visualizer
