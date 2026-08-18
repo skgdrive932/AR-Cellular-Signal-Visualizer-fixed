@@ -1,4 +1,4 @@
-package com.example.arsignal
+package com.example.arcellular
 
 import android.content.Context
 import android.os.Build
