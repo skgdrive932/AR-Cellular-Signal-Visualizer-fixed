@@ -1,7 +1,9 @@
 package com.example.arcellular
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -129,26 +131,40 @@ class MainActivity : AppCompatActivity() {
     private fun showSettingsDialog() {
         AlertDialog.Builder(this)
             .setTitle("Settings")
-            .setMessage("• Refresh Interval: 3 Seconds\n• Auto Mode Fallback: Enabled\n• AR Engine: Google ARCore")
+            .setMessage("Configuration Details:\n\n• Refresh Interval: 3 Seconds\n• Auto Mode Fallback: Enabled\n• AR Engine: Google ARCore / Sceneview\n\nHave any feedback or suggestions?")
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .setNeutralButton("Send Feedback") { _, _ ->
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:skgdrive932@gmail.com")
+                    putExtra(Intent.EXTRA_SUBJECT, "Feedback: AR Cellular Signal Visualizer")
+                }
+                try {
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(this, "No email client found", Toast.LENGTH_SHORT).show()
+                }
+            }
             .show()
     }
 
     private fun showAboutReadmeDialog() {
-        val readmeContent = """
-            # AR Cellular Signal Visualizer
+        val aboutContent = """
+            AR Cellular Signal Visualizer
             Developed by: SK Kaushal
+            
+            📧 Email: skgdrive932@gmail.com
+            📱 Contact: +919779371866
             
             Key Features:
             • Real-time Cellular Signal Tracking (dBm & Quality)
-            • Dual Mode: 2D Performance Dashboard & 3D AR Camera Visualization
-            • Battery Optimized Dynamic AR Loading
-            • Multi-Network Support (4G/5G/LTE)
+            • Dual Mode: 2D Dashboard & 3D AR Camera Mode
+            • Battery & Resource Optimized Dynamic AR Loading
+            • Multi-Network Telephony Support (4G/5G/LTE)
         """.trimIndent()
 
         AlertDialog.Builder(this)
-            .setTitle("About App (README)")
-            .setMessage(readmeContent)
+            .setTitle("About App")
+            .setMessage(aboutContent)
             .setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
             .show()
     }
