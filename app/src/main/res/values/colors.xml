@@ -1,0 +1,6 @@
+<resources>
+    <color name="signal_background">#101418</color>
+    <color name="signal_card">#1B2229</color>
+    <color name="signal_text">#FFFFFF</color>
+    <color name="signal_secondary">#B8C2CC</color>
+</resources>

@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">AR Cellular Signal Visualizer</string>
+    <string name="permission_required">Camera and location permissions are required for live signal visualization.</string>
+    <string name="grant_permissions">Grant permissions</string>
+    <string name="signal_unavailable">Signal unavailable</string>
+</resources>
