@@ -5,6 +5,8 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
@@ -14,6 +16,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.exceptions.UnavailableException
@@ -44,7 +47,6 @@ class MainActivity : AppCompatActivity() {
 
     private var is3DMode = false
     private var currentArNode: ArNode? = null
-    private var userRequestedInstall = true
     private val handler = Handler(Looper.getMainLooper())
 
     private val requiredPermissions = arrayOf(
@@ -71,6 +73,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Setup Action Toolbar
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
         reader = SignalReader(this)
 
         statusText = findViewById(R.id.statusText)
@@ -94,7 +100,6 @@ class MainActivity : AppCompatActivity() {
             toggleMode(!is3DMode)
         }
 
-        // Direct 2D setup on Start
         toggleMode(false)
 
         if (hasAllPermissions()) {
@@ -102,6 +107,57 @@ class MainActivity : AppCompatActivity() {
         } else {
             requestPermissionsIfNeeded()
         }
+    }
+
+    // 3-Dot Menu Initialize
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    // Menu Clicks Handling
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                showSettingsDialog()
+                true
+            }
+            R.id.action_about -> {
+                showAboutReadmeDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    // Settings Action
+    private fun showSettingsDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Settings")
+            .setMessage("• Refresh Interval: 3 Seconds\n• Auto Mode Fallback: Enabled\n• AR Engine: Google ARCore")
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
+
+    // About Dialog (Displays README details)
+    private fun showAboutReadmeDialog() {
+        val readmeContent = """
+            # AR Cellular Signal Visualizer
+            
+            Developed by: SK Kaushal
+            
+            Key Features:
+            • Real-time Cellular Signal Tracking (dBm & Quality)
+            • Dual Mode: 2D Performance Dashboard & 3D AR Camera Visualization
+            • Battery Optimized Dynamic AR Loading
+            • Multi-Network Support (4G/5G/LTE)
+        """.trimIndent()
+
+        AlertDialog.Builder(this)
+            .setTitle("About App (README)")
+            .setMessage(readmeContent)
+            .setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 
     override fun onStart() {
@@ -118,28 +174,23 @@ class MainActivity : AppCompatActivity() {
         is3DMode = enable3D
 
         if (is3DMode) {
-            // Switch to 3D AR Mode
             container2D.visibility = View.GONE
             arContainer.visibility = View.VISIBLE
             arOverlayCard.visibility = View.VISIBLE
             modeSwitchButton.text = "SWITCH TO 2D MODE"
 
-            // Dynamic AR View Creation
             if (sceneView == null) {
                 sceneView = ArSceneView(this)
                 arContainer.addView(sceneView)
             }
 
-            // Custom Dialog check trigger
             checkAndPromptARCore()
         } else {
-            // Switch to 2D Mode
             arContainer.visibility = View.GONE
             arOverlayCard.visibility = View.GONE
             container2D.visibility = View.VISIBLE
             modeSwitchButton.text = "SWITCH TO 3D AR MODE"
 
-            // Destroy AR View to save resources
             sceneView?.let {
                 arContainer.removeView(it)
                 sceneView = null
@@ -156,7 +207,6 @@ class MainActivity : AppCompatActivity() {
             val availability = ArCoreApk.getInstance().checkAvailability(this)
 
             if (availability.isTransient) {
-                // Agar status check hone mein thoda time lag raha ho toh retry
                 handler.postDelayed({ checkAndPromptARCore() }, 200)
                 return
             }
@@ -167,11 +217,8 @@ class MainActivity : AppCompatActivity() {
                 return
             }
 
-            // Check if ARCore is installed or needs installation/update
             val installStatus = ArCoreApk.getInstance().requestInstall(this, false)
             if (installStatus == ArCoreApk.InstallStatus.INSTALL_REQUESTED) {
-                
-                // Custom Alert Dialog with CONTINUE and CANCEL buttons
                 AlertDialog.Builder(this)
                     .setTitle("Google Play Services for AR")
                     .setMessage("This application requires the latest version of Google Play Services for AR to run 3D mode.")
@@ -184,7 +231,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     .setNegativeButton("CANCEL") { dialog, _ ->
                         dialog.dismiss()
-                        toggleMode(false) // Safe fallback to 2D Mode
+                        toggleMode(false)
                         Toast.makeText(this, "Switched back to 2D Mode", Toast.LENGTH_SHORT).show()
                     }
                     .setCancelable(false)
