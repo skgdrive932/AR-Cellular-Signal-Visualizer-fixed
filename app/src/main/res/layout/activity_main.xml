@@ -1,17 +1,162 @@
-<!-- 2D Container ke andar add karein -->
-<TextView
-    android:id="@+id/speedText2D"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Speed: 0 Kbps"
-    android:textSize="16sp"
-    android:textColor="@android:color/black" />
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-<!-- AR Overlay Card ke andar add karein -->
-<TextView
-    android:id="@+id/speedText"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Speed: 0 Kbps"
-    android:textSize="16sp"
-    android:textColor="@android:color/white" />
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        app:title="AR Signal Visualizer"
+        app:titleTextColor="@android:color/white" />
+
+    <LinearLayout
+        android:id="@+id/controlHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2D Dashboard Mode Active"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/permissionButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Grant Permissions"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/modeSwitchButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="SWITCH TO 3D AR MODE" />
+
+            <Button
+                android:id="@+id/refreshButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Refresh" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 2D Dashboard Container -->
+    <LinearLayout
+        android:id="@+id/container2D"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/controlHeader"
+        android:layout_margin="16dp"
+        android:background="#10000000"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/signalText2D"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Signal: -- dBm"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/networkText2D"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Network: --"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/qualityText2D"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Quality: --"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/speedText2D"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Speed: 0.0 Kbps"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#008000" />
+    </LinearLayout>
+
+    <!-- 3D AR Scene Container -->
+    <FrameLayout
+        android:id="@+id/arContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/controlHeader"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/arOverlayCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_margin="16dp"
+            android:background="#80000000"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/signalText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-- dBm"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/networkText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Network: --"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/qualityText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Quality: --"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/speedText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Speed: 0.0 Kbps"
+                android:textColor="#00FF00"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </FrameLayout>
+
+</RelativeLayout>
