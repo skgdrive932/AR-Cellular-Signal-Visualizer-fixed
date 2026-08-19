@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -53,12 +54,19 @@ class MainActivity : AppCompatActivity() {
     private var currentArNode: ArNode? = null
     private val handler = Handler(Looper.getMainLooper())
 
-    private val requiredPermissions = arrayOf(
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.READ_PHONE_STATE,
-        Manifest.permission.CAMERA
-    )
+    private val requiredPermissions: Array<String>
+        get() {
+            val permissions = mutableListOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.CAMERA
+            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+            return permissions.toTypedArray()
+        }
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -120,8 +128,18 @@ class MainActivity : AppCompatActivity() {
 
         if (hasAllPermissions()) {
             updatePermissionState()
+            startSpeedService()
         } else {
             requestPermissionsIfNeeded()
+        }
+    }
+
+    private fun startSpeedService() {
+        val serviceIntent = Intent(this, SpeedService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
         }
     }
 
@@ -147,7 +165,7 @@ class MainActivity : AppCompatActivity() {
     private fun showSettingsDialog() {
         AlertDialog.Builder(this)
             .setTitle("Settings")
-            .setMessage("Configuration Details:\n\n• Refresh Interval: 1 Second\n• Speed Unit: Automatic (Kbps/Mbps)\n• AR Engine: Google ARCore")
+            .setMessage("Configuration Details:\n\n• Notification Panel Tracker: Enabled\n• Refresh Interval: 1 Second\n• Speed Unit: Automatic (Kbps/Mbps)\n• AR Engine: Google ARCore")
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
             .setNeutralButton("Send Feedback") { _, _ ->
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
@@ -173,7 +191,7 @@ class MainActivity : AppCompatActivity() {
             
             Key Features:
             • Real-time Cellular Signal & Speed Tracking
-            • Dynamic Kbps / Mbps Formatting
+            • Live Notification Panel Speed Monitor
             • Dual Mode: 2D Dashboard & 3D AR
         """.trimIndent()
 
@@ -283,6 +301,7 @@ class MainActivity : AppCompatActivity() {
         if (hasAllPermissions()) {
             statusText.text = if (is3DMode) "3D AR Mode Active" else "2D Dashboard Mode Active"
             permissionButton.visibility = View.GONE
+            startSpeedService()
             updateSignal()
         } else {
             statusText.text = "Permissions required"
