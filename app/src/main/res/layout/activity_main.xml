@@ -1,162 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        app:title="AR Signal Visualizer"
-        app:titleTextColor="@android:color/white" />
+        android:elevation="4dp" />
 
-    <LinearLayout
-        android:id="@+id/controlHeader"
+    <!-- Status and Controls -->
+    <TextView
+        android:id="@+id/statusText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="10dp"
+        android:text="Status: Checking..."
+        android:textAlignment="center" />
 
-        <TextView
-            android:id="@+id/statusText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2D Dashboard Mode Active"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+    <Button
+        android:id="@+id/permissionButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Grant Permissions" />
 
-        <Button
-            android:id="@+id/permissionButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Grant Permissions"
-            android:visibility="gone" />
+    <Button
+        android:id="@+id/modeSwitchButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SWITCH TO 3D AR MODE" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal">
+    <Button
+        android:id="@+id/refreshButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Refresh Signal" />
 
-            <Button
-                android:id="@+id/modeSwitchButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="SWITCH TO 3D AR MODE" />
-
-            <Button
-                android:id="@+id/refreshButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="Refresh" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <!-- 2D Dashboard Container -->
+    <!-- 2D View Container -->
     <LinearLayout
         android:id="@+id/container2D"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/controlHeader"
-        android:layout_margin="16dp"
-        android:background="#10000000"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:id="@+id/signalText2D"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Signal: -- dBm"
-            android:textSize="22sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/networkText2D"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Network: --"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/qualityText2D"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Quality: --"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/speedText2D"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Speed: 0.0 Kbps"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#008000" />
+        android:gravity="center">
+        
+        <TextView android:id="@+id/signalText2D" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Signal: --" />
+        <TextView android:id="@+id/networkText2D" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Network: --" />
+        <TextView android:id="@+id/qualityText2D" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Quality: --" />
+        <TextView android:id="@+id/speedText2D" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Speed: 0 Mbps" />
     </LinearLayout>
 
-    <!-- 3D AR Scene Container -->
+    <!-- AR View Container -->
     <FrameLayout
         android:id="@+id/arContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/controlHeader"
         android:visibility="gone">
 
+        <!-- Overlay Card -->
         <LinearLayout
             android:id="@+id/arOverlayCard"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|center_horizontal"
-            android:layout_margin="16dp"
-            android:background="#80000000"
             android:orientation="vertical"
-            android:padding="12dp">
-
-            <TextView
-                android:id="@+id/signalText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="-- dBm"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/networkText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Network: --"
-                android:textColor="@android:color/white"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/qualityText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Quality: --"
-                android:textColor="@android:color/white"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/speedText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Speed: 0.0 Kbps"
-                android:textColor="#00FF00"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+            android:background="#AA000000"
+            android:padding="16dp"
+            android:layout_gravity="center">
+            
+            <TextView android:id="@+id/signalText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:text="Signal: --" />
+            <TextView android:id="@+id/networkText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:text="Network: --" />
+            <TextView android:id="@+id/qualityText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:text="Quality: --" />
+            <TextView android:id="@+id/speedText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:text="Speed: 0 Mbps" />
         </LinearLayout>
     </FrameLayout>
 
-</RelativeLayout>
+</LinearLayout>
