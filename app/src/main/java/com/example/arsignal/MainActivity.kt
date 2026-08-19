@@ -28,6 +28,8 @@ import io.github.sceneview.math.Position
 class MainActivity : AppCompatActivity() {
 
     private lateinit var reader: SignalReader
+    private lateinit var speedMonitor: NetworkSpeedMonitor
+
     private lateinit var statusText: TextView
     private lateinit var permissionButton: Button
     private lateinit var modeSwitchButton: Button
@@ -39,11 +41,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var signalText: TextView
     private lateinit var networkText: TextView
     private lateinit var qualityText: TextView
+    private lateinit var speedText: TextView
 
     private lateinit var container2D: LinearLayout
     private lateinit var signalText2D: TextView
     private lateinit var networkText2D: TextView
     private lateinit var qualityText2D: TextView
+    private lateinit var speedText2D: TextView
 
     private var is3DMode = false
     private var currentArNode: ArNode? = null
@@ -65,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             if (hasAllPermissions()) {
                 updateSignal()
             }
-            handler.postDelayed(this, 3000)
+            handler.postDelayed(this, 1000) // Update every 1 second for live speed accuracy
         }
     }
 
@@ -77,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         reader = SignalReader(this)
+        speedMonitor = NetworkSpeedMonitor()
 
         statusText = findViewById(R.id.statusText)
         permissionButton = findViewById(R.id.permissionButton)
@@ -88,18 +93,20 @@ class MainActivity : AppCompatActivity() {
         signalText = findViewById(R.id.signalText)
         networkText = findViewById(R.id.networkText)
         qualityText = findViewById(R.id.qualityText)
+        speedText = findViewById(R.id.speedText)
 
         container2D = findViewById(R.id.container2D)
         signalText2D = findViewById(R.id.signalText2D)
         networkText2D = findViewById(R.id.networkText2D)
         qualityText2D = findViewById(R.id.qualityText2D)
+        speedText2D = findViewById(R.id.speedText2D)
 
         permissionButton.setOnClickListener { requestPermissionsIfNeeded() }
 
         refreshButton.setOnClickListener {
             if (hasAllPermissions()) {
                 updateSignal()
-                Toast.makeText(this, "Signal Refreshed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Refreshed", Toast.LENGTH_SHORT).show()
             } else {
                 requestPermissionsIfNeeded()
             }
@@ -140,7 +147,7 @@ class MainActivity : AppCompatActivity() {
     private fun showSettingsDialog() {
         AlertDialog.Builder(this)
             .setTitle("Settings")
-            .setMessage("Configuration Details:\n\n• Refresh Interval: 3 Seconds\n• AR Engine: Google ARCore\n\nHave feedback?")
+            .setMessage("Configuration Details:\n\n• Refresh Interval: 1 Second\n• Speed Unit: Automatic (Kbps/Mbps)\n• AR Engine: Google ARCore")
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
             .setNeutralButton("Send Feedback") { _, _ ->
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
@@ -165,7 +172,8 @@ class MainActivity : AppCompatActivity() {
             📱 Contact: +919779371866
             
             Key Features:
-            • Real-time Cellular Signal Tracking
+            • Real-time Cellular Signal & Speed Tracking
+            • Dynamic Kbps / Mbps Formatting
             • Dual Mode: 2D Dashboard & 3D AR
         """.trimIndent()
 
@@ -178,6 +186,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        speedMonitor.start()
         handler.post(poller)
     }
 
@@ -243,7 +252,7 @@ class MainActivity : AppCompatActivity() {
     private fun showCustomArRequiredDialog() {
         AlertDialog.Builder(this)
             .setTitle("AR Core Required")
-            .setMessage("3D AR mode use karne ke liye Google Play Services for AR required hai. Kya aap ise setup karna chahte hain?")
+            .setMessage("3D AR mode use karne ke liye Google Play Services for AR required hai.")
             .setPositiveButton("Install / Enable") { _, _ ->
                 try {
                     ArCoreApk.getInstance().requestInstall(this, true)
@@ -255,7 +264,6 @@ class MainActivity : AppCompatActivity() {
             .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
                 toggleMode(false)
-                Toast.makeText(this, "Switched back to 2D Mode", Toast.LENGTH_SHORT).show()
             }
             .setCancelable(false)
             .show()
@@ -286,6 +294,9 @@ class MainActivity : AppCompatActivity() {
         if (!::reader.isInitialized) return
 
         val info = reader.read()
+        val speedInfo = speedMonitor.getDownloadSpeed()
+
+        val speedDisplay = "Speed: ${speedInfo.formattedSpeed}"
 
         if (info.dbm == null) {
             val unavail = "Signal unavailable"
@@ -295,6 +306,8 @@ class MainActivity : AppCompatActivity() {
             networkText2D.text = "Network: ${info.networkType}"
             qualityText.text = "Quality: —"
             qualityText2D.text = "Quality: —"
+            speedText.text = speedDisplay
+            speedText2D.text = speedDisplay
             return
         }
 
@@ -305,10 +318,12 @@ class MainActivity : AppCompatActivity() {
         signalText2D.text = dbmStr
         networkText2D.text = netStr
         qualityText2D.text = qualStr
+        speedText2D.text = speedDisplay
 
         signalText.text = dbmStr
         networkText.text = netStr
         qualityText.text = qualStr
+        speedText.text = speedDisplay
 
         if (is3DMode) {
             add3DSignalNode(info.dbm)
