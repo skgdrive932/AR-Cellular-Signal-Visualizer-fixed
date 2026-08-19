@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             if (hasAllPermissions()) {
                 updateSignal()
             }
-            handler.postDelayed(this, 1000) // Update every 1 second for live speed accuracy
+            handler.postDelayed(this, 1000)
         }
     }
 
