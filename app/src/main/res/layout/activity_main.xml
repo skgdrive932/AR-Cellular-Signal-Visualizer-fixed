@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0F172A"> <!-- Dark Premium Background -->
+    android:background="#0F172A">
 
     <!-- Top Action Bar -->
     <androidx.appcompat.widget.Toolbar
@@ -94,10 +94,11 @@
             android:textSize="32sp"
             android:textStyle="bold" />
 
+        <!-- Fixed layout_marginVertical property -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_my="12dp"
+            android:layout_marginVertical="12dp"
             android:background="#334155" />
 
         <TextView
