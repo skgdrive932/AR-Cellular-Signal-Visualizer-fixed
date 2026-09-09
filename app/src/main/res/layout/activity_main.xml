@@ -4,20 +4,27 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="16dp">
+    android:padding="20dp">
 
-    <EditText
-        android:id="@+id/etAmount"
-        android:layout_width="match_parent"
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Enter Amount (₹)"
-        android:inputType="numberDecimal" />
+        android:text="Choose Payment Method"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="30dp" />
 
     <Button
-        android:id="@+id/btnPayUPI"
+        android:id="@+id/btnUpiIntent"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Pay via UPI App"
-        android:layout_marginTop="16dp" />
+        android:layout_height="60dp"
+        android:text="Pay via UPI App (GPay / PhonePe / Paytm)"
+        android:layout_marginBottom="15dp" />
+
+    <Button
+        android:id="@+id/btnRazorpay"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Pay via Razorpay Gateway" />
 
 </LinearLayout>
