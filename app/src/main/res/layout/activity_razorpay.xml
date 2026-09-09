@@ -4,20 +4,29 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="16dp">
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Razorpay Checkout"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp" />
 
     <EditText
-        android:id="@+id/etRazorpayAmount"
+        android:id="@+id/etAmount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter Amount in INR (e.g. 100)"
-        android:inputType="numberDecimal" />
+        android:hint="Enter Amount (₹)"
+        android:inputType="numberDecimal"
+        android:textSize="18sp" />
 
     <Button
-        android:id="@+id/btnPayRazorpay"
+        android:id="@+id/btnStartPayment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Pay via Razorpay"
-        android:layout_marginTop="16dp" />
+        android:layout_height="55dp"
+        android:text="Pay Now"
+        android:layout_marginTop="20dp" />
 
 </LinearLayout>
