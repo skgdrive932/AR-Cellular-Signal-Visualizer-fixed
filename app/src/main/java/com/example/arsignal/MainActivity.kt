@@ -1,5 +1,6 @@
 package com.example.arsignal
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -12,7 +13,6 @@ class MainActivity : AppCompatActivity() {
 
     private val UPI_PAYMENT_REQUEST_CODE = 101
 
-    // Aapki real UPI ID aur naam yahan update kar diya gaya hai
     private val upiId = "santosh.kaushal@ptaxis"
     private val payeeName = "SK Kaushal"
 
@@ -20,17 +20,33 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val btnUpi = findViewById<Button>(R.id.btnUpiIntent)
-        val btnRazorpay = findViewById<Button>(R.id.btnRazorpay)
+        val btn2D = findViewById<Button>(R.id.btn2DFeature) // Apna 2D Button ID rakhein
+        val btn3D = findViewById<Button>(R.id.btn3DFeature) // Apna 3D Button ID rakhein
 
-        btnUpi.setOnClickListener {
-            payWithUpiIntent("100.00")
+        // 1. 2D Feature - Always Free
+        btn2D?.setOnClickListener {
+            open2DVisualizer()
         }
 
-        btnRazorpay.setOnClickListener {
-            val intent = Intent(this, RazorpayActivity::class.java)
-            startActivity(intent)
+        // 2. 3D Premium Feature - Check Payment Status
+        btn3D?.setOnClickListener {
+            if (isPremiumUser()) {
+                open3DVisualizer()
+            } else {
+                Toast.makeText(this, "3D Feature is Premium! Please pay to unlock.", Toast.LENGTH_LONG).show()
+                payWithUpiIntent("100.00") // Trigger Payment
+            }
         }
+    }
+
+    private fun open2DVisualizer() {
+        Toast.makeText(this, "Opening 2D Signal Mode...", Toast.LENGTH_SHORT).show()
+        // Yahan apni 2D Activity launch karein
+    }
+
+    private fun open3DVisualizer() {
+        Toast.makeText(this, "Opening 3D AR Signal Visualizer!", Toast.LENGTH_SHORT).show()
+        // Yahan apni 3D / AR Activity launch karein
     }
 
     private fun payWithUpiIntent(amount: String) {
@@ -41,7 +57,7 @@ class MainActivity : AppCompatActivity() {
             .appendQueryParameter("pn", payeeName)
             .appendQueryParameter("mc", "")
             .appendQueryParameter("tr", System.currentTimeMillis().toString())
-            .appendQueryParameter("tn", "AR Signal Visualizer Payment")
+            .appendQueryParameter("tn", "Unlock 3D Premium Feature")
             .appendQueryParameter("am", amount)
             .appendQueryParameter("cu", "INR")
             .build()
@@ -50,7 +66,7 @@ class MainActivity : AppCompatActivity() {
             data = uri
         }
 
-        val chooser = Intent.createChooser(upiPayIntent, "Pay with UPI")
+        val chooser = Intent.createChooser(upiPayIntent, "Pay with UPI to Unlock 3D Mode")
         if (chooser.resolveActivity(packageManager) != null) {
             startActivityForResult(chooser, UPI_PAYMENT_REQUEST_CODE)
         } else {
@@ -65,13 +81,34 @@ class MainActivity : AppCompatActivity() {
             if (data != null) {
                 val response = data.getStringExtra("response")
                 if (response != null && (response.contains("SUCCESS", ignoreCase = true) || response.contains("Status=SUCCESS", ignoreCase = true))) {
-                    Toast.makeText(this, "Payment Successful!", Toast.LENGTH_LONG).show()
+                    
+                    // Payment successful -> Save Premium Status permanently
+                    setPremiumUserStatus(true)
+                    Toast.makeText(this, "Payment Successful! 3D Feature Unlocked 🎉", Toast.LENGTH_LONG).show()
+                    
+                    // Direct 3D Feature open karein
+                    open3DVisualizer()
+
                 } else {
                     Toast.makeText(this, "Payment Failed or Cancelled", Toast.LENGTH_LONG).show()
                 }
             } else {
                 Toast.makeText(this, "Payment Cancelled", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    // Helper functions for Local Storage
+    private fun isPremiumUser(): Boolean {
+        val sharedPref = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        return sharedPref.getBoolean("is_3D_Unlocked", false)
+    }
+
+    private fun setPremiumUserStatus(isUnlocked: Boolean) {
+        val sharedPref = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putBoolean("is_3D_Unlocked", isUnlocked)
+            apply()
         }
     }
 }
