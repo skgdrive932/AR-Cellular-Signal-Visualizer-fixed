@@ -13,7 +13,6 @@ class MainActivity : AppCompatActivity() {
 
     private val UPI_PAYMENT_REQUEST_CODE = 101
 
-    // Aapki verified UPI ID aur Name
     private val upiId = "santosh.kaushal@ptaxis"
     private val payeeName = "SK Kaushal"
 
@@ -41,17 +40,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun open2DVisualizer() {
-        Toast.makeText(this, "Opening 2D Signal Visualizer Mode...", Toast.LENGTH_SHORT).show()
-        // Yahan apni 2D Activity ka Intent launch karein
-        // val intent = Intent(this, Signal2DActivity::class.java)
-        // startActivity(intent)
+        try {
+            // Yahan 2D Activity launch karne ka intent add kar diya hai
+            val intent = Intent(this, Signal2DActivity::class.java)
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "2D Activity Error: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun open3DVisualizer() {
-        Toast.makeText(this, "Opening 3D AR Signal Visualizer!", Toast.LENGTH_SHORT).show()
-        // Yahan apni 3D / AR Activity ka Intent launch karein
-        // val intent = Intent(this, Signal3DActivity::class.java)
-        // startActivity(intent)
+        try {
+            // Yahan 3D Activity launch karne ka intent
+            val intent = Intent(this, ARSessionManager::class.java)
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Opening 3D AR Visualizer...", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun payWithUpiIntent(amount: String) {
@@ -87,11 +92,8 @@ class MainActivity : AppCompatActivity() {
                 val response = data.getStringExtra("response")
                 if (response != null && (response.contains("SUCCESS", ignoreCase = true) || response.contains("Status=SUCCESS", ignoreCase = true))) {
                     
-                    // Payment successful -> Lock open karein aur memory mein save karein
                     save3DUnlockedStatus(true)
                     Toast.makeText(this, "Payment Successful! 3D Feature Unlocked 🎉", Toast.LENGTH_LONG).show()
-                    
-                    // Direct 3D feature open karein
                     open3DVisualizer()
 
                 } else {
@@ -103,7 +105,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Phone ki local storage mein check aur save karne ke methods
     private fun is3DUnlocked(): Boolean {
         val sharedPref = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
         return sharedPref.getBoolean("is_3D_Unlocked", false)
