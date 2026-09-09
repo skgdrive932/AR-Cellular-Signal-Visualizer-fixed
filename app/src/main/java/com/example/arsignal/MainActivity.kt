@@ -12,8 +12,9 @@ class MainActivity : AppCompatActivity() {
 
     private val UPI_PAYMENT_REQUEST_CODE = 101
 
-    private val upiId = "yourname@upi"
-    private val payeeName = "Kaushal"
+    // Aapki real UPI ID aur naam yahan update kar diya gaya hai
+    private val upiId = "santosh.kaushal@ptaxis"
+    private val payeeName = "SK Kaushal"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +41,7 @@ class MainActivity : AppCompatActivity() {
             .appendQueryParameter("pn", payeeName)
             .appendQueryParameter("mc", "")
             .appendQueryParameter("tr", System.currentTimeMillis().toString())
-            .appendQueryParameter("tn", "App Payment")
+            .appendQueryParameter("tn", "AR Signal Visualizer Payment")
             .appendQueryParameter("am", amount)
             .appendQueryParameter("cu", "INR")
             .build()
