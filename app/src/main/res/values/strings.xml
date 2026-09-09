@@ -1,3 +1,12 @@
 <resources>
+    <!-- App Name -->
     <string name="app_name">AR Cellular Signal Visualizer</string>
+
+    <!-- Payment Screen Strings -->
+    <string name="choose_payment_method">Choose Payment Method</string>
+    <string name="pay_via_upi">Pay via UPI App (GPay / PhonePe / Paytm)</string>
+    <string name="pay_via_razorpay">Pay via Razorpay Gateway</string>
+    <string name="razorpay_checkout">Razorpay Checkout</string>
+    <string name="enter_amount">Enter Amount (₹)</string>
+    <string name="pay_now">Pay Now</string>
 </resources>
