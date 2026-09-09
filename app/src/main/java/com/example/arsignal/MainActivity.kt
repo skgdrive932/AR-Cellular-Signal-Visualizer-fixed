@@ -1,10 +1,9 @@
-package com.example.arsignalvisualizer // Apne package name ke hisab se change karein
+package com.example.arsignalvisualizer
 
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
-import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
@@ -12,33 +11,35 @@ class MainActivity : AppCompatActivity() {
 
     private val UPI_PAYMENT_REQUEST_CODE = 101
 
-    // Yahan apni VPA/UPI ID aur Name dalein
-    private val upiId = "yourname@upi" 
-    private val name = "Kaushal"
+    // Apni UPI ID aur Naam yahan set karein
+    private val upiId = "yourname@upi"
+    private val payeeName = "Kaushal"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val etAmount = findViewById<EditText>(R.id.etAmount)
-        val btnPay = findViewById<Button>(R.id.btnPayUPI)
+        val btnUpi = findViewById<Button>(R.id.btnUpiIntent)
+        val btnRazorpay = findViewById<Button>(R.id.btnRazorpay)
 
-        btnPay.setOnClickListener {
-            val amount = etAmount.text.toString().trim()
-            if (amount.isNotEmpty()) {
-                payWithUpi(amount)
-            } else {
-                Toast.makeText(this, "Please enter an amount", Toast.LENGTH_SHORT).show()
-            }
+        // 1. Direct UPI App (GPay/PhonePe) kholne ke liye
+        btnUpi.setOnClickListener {
+            payWithUpiIntent("100.00") // Set default amount
+        }
+
+        // 2. Razorpay Gateway Screen par jaane ke liye
+        btnRazorpay.setOnClickListener {
+            val intent = Intent(this, RazorpayActivity::class.java)
+            startActivity(intent)
         }
     }
 
-    private fun payWithUpi(amount: String) {
+    private fun payWithUpiIntent(amount: String) {
         val uri = Uri.Builder()
             .scheme("upi")
             .authority("pay")
             .appendQueryParameter("pa", upiId)
-            .appendQueryParameter("pn", name)
+            .appendQueryParameter("pn", payeeName)
             .appendQueryParameter("mc", "")
             .appendQueryParameter("tr", System.currentTimeMillis().toString())
             .appendQueryParameter("tn", "App Payment")
@@ -50,11 +51,11 @@ class MainActivity : AppCompatActivity() {
             data = uri
         }
 
-        val chooser = Intent.createChooser(upiPayIntent, "Pay with")
+        val chooser = Intent.createChooser(upiPayIntent, "Pay with UPI")
         if (chooser.resolveActivity(packageManager) != null) {
             startActivityForResult(chooser, UPI_PAYMENT_REQUEST_CODE)
         } else {
-            Toast.makeText(this, "No UPI app found on this device", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "No UPI app found on your phone", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -63,11 +64,11 @@ class MainActivity : AppCompatActivity() {
 
         if (requestCode == UPI_PAYMENT_REQUEST_CODE) {
             if (data != null) {
-                val trxt = data.getStringExtra("response")
-                if (trxt != null && (trxt.contains("SUCCESS", ignoreCase = true) || trxt.contains("Status=SUCCESS", ignoreCase = true))) {
-                    Toast.makeText(this, "Transaction Successful!", Toast.LENGTH_LONG).show()
+                val response = data.getStringExtra("response")
+                if (response != null && (response.contains("SUCCESS", ignoreCase = true) || response.contains("Status=SUCCESS", ignoreCase = true))) {
+                    Toast.makeText(this, "Payment Successful!", Toast.LENGTH_LONG).show()
                 } else {
-                    Toast.makeText(this, "Transaction Failed or Cancelled", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Payment Failed or Cancelled", Toast.LENGTH_LONG).show()
                 }
             } else {
                 Toast.makeText(this, "Payment Cancelled", Toast.LENGTH_SHORT).show()
