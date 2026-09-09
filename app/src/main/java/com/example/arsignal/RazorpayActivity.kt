@@ -1,10 +1,11 @@
-package com.example.arsignalvisualizer
+package com.example.arsignal
 
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.arsignal.R
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import org.json.JSONObject
@@ -15,7 +16,6 @@ class RazorpayActivity : AppCompatActivity(), PaymentResultListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_razorpay)
 
-        // Razorpay SDK ko preload karna
         Checkout.preload(applicationContext)
 
         val etAmount = findViewById<EditText>(R.id.etAmount)
@@ -35,7 +35,6 @@ class RazorpayActivity : AppCompatActivity(), PaymentResultListener {
     private fun startPayment(amountInPaise: Double) {
         val checkout = Checkout()
         
-        // Apni Razorpay Dashboard ki Key ID yahan rzp_test_YOUR_KEY_HERE ki jagah dalein
         checkout.setKeyID("rzp_test_YOUR_KEY_HERE")
 
         try {
