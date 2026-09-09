@@ -1,10 +1,8 @@
-<resources>
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:fontFamily">sans</item>
-        <item name="android:windowActionModeOverlay">true</item>
-        <item name="android:colorAccent">#00C853</item>
-        <item name="android:navigationBarColor">#101418</item>
-        <item name="android:statusBarColor">#101418</item>
-        <item name="android:windowLightStatusBar">false</item>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme -->
+    <style name="Base.Theme.ARCellularSignalVisualizer" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here -->
     </style>
+
+    <style name="Theme.ARCellularSignalVisualizer" parent="Base.Theme.ARCellularSignalVisualizer" />
 </resources>
