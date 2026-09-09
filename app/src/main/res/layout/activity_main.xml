@@ -4,27 +4,32 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="20dp">
+    android:padding="24dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Choose Payment Method"
-        android:textSize="20sp"
+        android:text="AR Cellular Signal Visualizer"
+        android:textSize="22sp"
         android:textStyle="bold"
-        android:layout_marginBottom="30dp" />
+        android:layout_marginBottom="40dp" />
 
+    <!-- 2D Free Feature Button -->
     <Button
-        android:id="@+id/btnUpiIntent"
+        android:id="@+id/btn2DFeature"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="Pay via UPI App (GPay / PhonePe / Paytm)"
-        android:layout_marginBottom="15dp" />
+        android:text="2D Signal Visualizer (Free)"
+        android:textSize="16sp"
+        android:layout_marginBottom="16dp" />
 
+    <!-- 3D Premium Feature Button -->
     <Button
-        android:id="@+id/btnRazorpay"
+        android:id="@+id/btn3DFeature"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="Pay via Razorpay Gateway" />
+        android:text="3D AR Signal Visualizer (₹100 Premium)"
+        android:textSize="16sp"
+        android:backgroundTint="#6200EE" />
 
 </LinearLayout>
