@@ -1,4 +1,4 @@
-package com.example.arsignalvisualizer
+package com.example.arsignal
 
 import android.content.Intent
 import android.net.Uri
@@ -6,12 +6,12 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.arsignal.R
 
 class MainActivity : AppCompatActivity() {
 
     private val UPI_PAYMENT_REQUEST_CODE = 101
 
-    // Apni UPI ID aur Naam yahan set karein
     private val upiId = "yourname@upi"
     private val payeeName = "Kaushal"
 
@@ -22,12 +22,10 @@ class MainActivity : AppCompatActivity() {
         val btnUpi = findViewById<Button>(R.id.btnUpiIntent)
         val btnRazorpay = findViewById<Button>(R.id.btnRazorpay)
 
-        // 1. Direct UPI App (GPay/PhonePe) kholne ke liye
         btnUpi.setOnClickListener {
-            payWithUpiIntent("100.00") // Set default amount
+            payWithUpiIntent("100.00")
         }
 
-        // 2. Razorpay Gateway Screen par jaane ke liye
         btnRazorpay.setOnClickListener {
             val intent = Intent(this, RazorpayActivity::class.java)
             startActivity(intent)
