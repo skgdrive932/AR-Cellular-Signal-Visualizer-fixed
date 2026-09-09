@@ -1,4 +1,4 @@
-package com.example.arsignalvisualizer // Apne package name ke hisab se change karein
+package com.example.arsignalvisualizer
 
 import android.os.Bundle
 import android.widget.Button
@@ -15,19 +15,19 @@ class RazorpayActivity : AppCompatActivity(), PaymentResultListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_razorpay)
 
-        // Razorpay preload
+        // Razorpay SDK ko preload karna
         Checkout.preload(applicationContext)
 
-        val etAmount = findViewById<EditText>(R.id.etRazorpayAmount)
-        val btnPay = findViewById<Button>(R.id.btnPayRazorpay)
+        val etAmount = findViewById<EditText>(R.id.etAmount)
+        val btnPay = findViewById<Button>(R.id.btnStartPayment)
 
         btnPay.setOnClickListener {
-            val amountStr = etAmount.text.toString().trim()
-            if (amountStr.isNotEmpty()) {
-                val amountInPaise = amountStr.toDouble() * 100
+            val amountText = etAmount.text.toString().trim()
+            if (amountText.isNotEmpty()) {
+                val amountInPaise = amountText.toDouble() * 100
                 startPayment(amountInPaise)
             } else {
-                Toast.makeText(this, "Enter valid amount", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please enter amount", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -35,31 +35,31 @@ class RazorpayActivity : AppCompatActivity(), PaymentResultListener {
     private fun startPayment(amountInPaise: Double) {
         val checkout = Checkout()
         
-        // Yahan apni Razorpay Dashboard ki Key ID dalein
-        checkout.setKeyID("rzp_test_YOUR_KEY_HERE") 
+        // Apni Razorpay Dashboard ki Key ID yahan rzp_test_YOUR_KEY_HERE ki jagah dalein
+        checkout.setKeyID("rzp_test_YOUR_KEY_HERE")
 
         try {
             val options = JSONObject()
-            options.put("name", "AR Signal Visualizer")
+            options.put("name", "AR Cellular Signal Visualizer")
             options.put("description", "App Subscription Fee")
             options.put("theme.color", "#3399cc")
             options.put("currency", "INR")
             options.put("amount", amountInPaise)
 
             val prefill = JSONObject()
-            prefill.put("email", "user@gmail.com")
+            prefill.put("email", "user@example.com")
             prefill.put("contact", "9876543210")
             options.put("prefill", prefill)
 
             checkout.open(this, options)
         } catch (e: Exception) {
-            Toast.makeText(this, "Error in payment: " + e.message, Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Error: " + e.message, Toast.LENGTH_LONG).show()
             e.printStackTrace()
         }
     }
 
     override fun onPaymentSuccess(razorpayPaymentID: String?) {
-        Toast.makeText(this, "Payment Successful ID: $razorpayPaymentID", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Payment Successful! ID: $razorpayPaymentID", Toast.LENGTH_LONG).show()
     }
 
     override fun onPaymentError(code: Int, response: String?) {
